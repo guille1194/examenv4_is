@@ -137,7 +137,7 @@ def anadir_respuesta(request):
 			instance2 = form.save(commit=False)
 			instance2.id_pregunta = instance.pregun
 			instance2.id_respuesta = instance.nombre
-			instance2.save()		
+			instance2.save()
 			return redirect('anadir_respuesta')
 		else:
 			print 'error en captura de respuesta'
@@ -167,9 +167,9 @@ def generar_examen(request,pk):
 	i = 0
 	for i in context.items():
 		i += 1
-		#print i 
+		#print i
 		return i
-	
+
 	if form.is_valid():
 		instance = form.save()
 		instance.id_materia = materia.objects.get(serie = request.POST['id_materia'])
@@ -177,6 +177,32 @@ def generar_examen(request,pk):
 		print instance.id_pregunta_respuesta
 		instance.save()
 	return render(request,'app_examen/crear_examen.html',ctx)
+
+def delete_examen(request, id=None):
+	examen = get_object_or_404(Post, id_examen=id)
+	examen.delete()
+	return redirect('listado_materias')
+
+def update_examen(request, id=None):
+	post = get_object_or_404(examen, id_examen=id)
+	form = examenForm(request.POST or None, request.FILES or None, instance=post)
+	if form.is_valid():
+		try:
+			post = form.save()
+			post.save()
+			context = {
+				"post":post,
+			}
+			return render(request, "app_examen/examen_detalle.html", context)
+		except:
+			print "An error"
+	context = {
+		"object_list": "eee",
+		"post":post,
+		"form": form,
+		"Materia": materia.objects.all()
+	}
+	return render(request, "app_examen/examen_update.html", context)
 
 def materias_alumno(request):
 	current_user = request.user.alumno.n_control
@@ -187,11 +213,12 @@ def materias_alumno(request):
 
 
 def examen_detalle(request, id=None):
-	examen = get_object_or_404(examen, id_examen=id)
+	realizar_examen = get_object_or_404(realizar_examen, id=id)
 	ctx = {
 		"object_list": "eee",
-		"examen": examen,
+		"realizar_examen": realizar_examen,
 	}
+	return render(request, "app_examen/examen_detalle.html", ctx)
 
 def examen_lista(request):
 	current_user = request.user.alumno.n_control
@@ -209,6 +236,3 @@ def examen_lista(request):
 			"object_list2":queryset_list2,
 	}
 	return render(request, "app_examen/examen_lista.html",ctx)
-
-
-
